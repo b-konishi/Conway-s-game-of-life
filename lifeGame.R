@@ -15,7 +15,7 @@ weightingAdder <- function(M) {
   TMP = matrix(0, nrow=SIZE, ncol=SIZE, byrow=T)
   for (i in 1:SIZE) {
     for (j in 1:SIZE) {
-      if (M[i,j] == DEAD)  next
+      if (M[i,j] == DEATH)  next
       for (k in -1:1) {
         for (l in -1:1) {
           if (k == 0 && l == 0) next
