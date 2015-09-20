@@ -144,7 +144,7 @@ repeat {
 
   A = B
   image(A, main=paste(title, generation, sep=": "), col=c("black", "green"), axes = TRUE, pch=21)
-  if (counter != "" && generation == as.numeric(counter))  break
+  if (counter != "" && generation == as.numeric(counter))  counter = ""
   generation = generation + 1
 }
 
