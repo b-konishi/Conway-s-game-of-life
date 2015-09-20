@@ -5,41 +5,37 @@ if (SIZE == "") {
 } else {
   SIZE = as.numeric(SIZE)
 }
-BIRTH = 1
-STABLE = 2
+BORN = 1
+SURVIVES = 2
 
-deadOrAlive <- function(M, x, y, rule) {
-  child = 0
-  for (i in -1:1) {
-    for (j in -1:1) {
-      if (i == 0 && j == 0) next
-      tmp_x = x + i
-      tmp_y = y + j
-      if (x+i == 0)  tmp_x = SIZE
-      else if (x+i == SIZE+1) tmp_x = 1
-      if (y+j == 0)  tmp_y = SIZE
-      else if (y+j == SIZE+1) tmp_y = 1
+DEAD = BORN-1
+ALIVE = SURVIVES-1
 
-      if (M[tmp_x, tmp_y] == 1) child = child + 1
-      if (child > max(rule[[1]], rule[[2]]))  break
-    }
-    if (child > max(rule[[1]], rule[[2]]))  break
-  }
-  if (M[x,y] == BIRTH-1 && length(rule[[BIRTH]][1]) != 0) {
-    for (i in 1:length(rule[[BIRTH]])) {
-      if (child == rule[[BIRTH]][i]) return(1)
-    }
-  } else if (M[x,y] == STABLE-1 && length(rule[[STABLE]][1]) != 0) {
-    for (i in 1:length(rule[[STABLE]])) {
-      if (child == rule[[STABLE]][i]) return(1)
+weightingAdder <- function(M) {
+  TMP = matrix(0, nrow=SIZE, ncol=SIZE, byrow=T)
+  for (i in 1:SIZE) {
+    for (j in 1:SIZE) {
+      if (M[i,j] == DEAD)  next
+      for (k in -1:1) {
+        for (l in -1:1) {
+          if (k == 0 && l == 0) next
+          x = i + k
+          y = j + l
+          if (i+k == 0)  x = SIZE
+          else if (i+k == SIZE+1) x = 1
+          if (j+l == 0)  y = SIZE
+          else if (j+l == SIZE+1) y = 1
+
+          TMP[x,y] = TMP[x,y] + 1
+        }
+      }
     }
   }
-  return(0)
+  return(TMP)
 }
 
-
-print("Type: {fill, empty, random}={f, e, r}")
-type <- readline("Type?: ")
+cat('Type: {fill, empty, random}={f, e, r}\n')
+type <- readline("Type: ")
 if (type == "f") {
   A = matrix(1, nrow=SIZE, ncol=SIZE, byrow=T)
   image(A, col="green")
@@ -60,31 +56,29 @@ if (count == "") {
 }
 for (i in 1:count) {
   if (count == 0) break
-  print(i)
+  print(i, quote=FALSE)
   input <- as.numeric(locator(1))
   pos <- as.numeric(input) + 0.05
   len <- 1.1 / SIZE
   pos <- as.integer(pos/len) + 1
-  if (A[pos[1], pos[2]] == 1) A[pos[1], pos[2]] = 0
-  else  A[pos[1], pos[2]] = 1
+  if (A[pos[1], pos[2]] == 1)
+    A[pos[1], pos[2]] = 0
+  else
+    A[pos[1], pos[2]] = 1
 
-  flag = FALSE
-  for (j in 1:SIZE) {
-    for (k in 1:SIZE) {
-      if (A[j,k] == 0) flag = TRUE
-    }
-  }
-  if (flag) image(A, col=c("white","green"))
-  else  image(A, col=c("green"))
+  if (length(A[A==1]) == length(A))
+    image(A, col=c("green"))
+  else
+    image(A, col=c("white", "green"))
 }
 
 
 title = ""
-print("nomal: B3/S23")
-print("day and night: B3678/S34678")
-print("HighLife: B36/S23")
-print("Replicator: B1357/S1357")
-print("2x2: B36/S125")
+cat("nomal: B3/S23\n")
+cat("day and night: B3678/S34678\n")
+cat("HighLife: B36/S23\n")
+cat("Replicator: B1357/S1357\n")
+cat("2x2: B36/S125\n")
 rule <- readline("Input Pattern: ")
 if (rule == "nomal" || rule == "") {
   title = "nomal"
@@ -119,28 +113,25 @@ if (rule_born[[1]] == 0) {
   rule <- list(rule_born, rule_survives)
 }
 
-convergence_flag = FALSE
-if (readline("Convergence-Mode: ") == "y")  convergence_flag = TRUE
-
 generation = 1
 convergence = TRUE
 B = matrix(0, nrow=SIZE, ncol=SIZE, byrow=T)
 repeat {
   readline()
-  for (i in 1:SIZE) {
-    for (j in 1:SIZE) {
-      B[i,j] = deadOrAlive(A, i, j, rule)
-    }
-  }
-  if (convergence_flag) {
-    for (i in 1:SIZE^2) {
-      if (as.vector(A)[i] != as.vector(B)[i]) {
-        convergence = FALSE
+  TMP = weightingAdder(A)
+  for (x in 1:SIZE) {
+    for (y in 1:SIZE) {
+      if (A[x,y] == DEATH && length(rule[[BORN]][1]) != 0) {
+        if (length(rule[[BORN]][rule[[BORN]] == TMP[x,y]]) == 1)  B[x,y] = 1
+        else  B[x,y] = 0
+      } else if (A[x,y] == ALIVE && length(rule[[SURVIVES]][1]) != 0) {
+        if (length(rule[[SURVIVES]][rule[[SURVIVES]] == TMP[x,y]]) == 1)  B[x,y] = 1
+        else  B[x,y] = 0
       }
     }
-    if (convergence)  break
-    else  convergence = TRUE
   }
+  if (length((A==B)[(A==B)==TRUE]) == SIZE^2) break
+
   A = B
   image(A, main=paste(title, generation, sep=": "), col=c("white", "green"), axes = TRUE, pch=21)
   generation = generation + 1
