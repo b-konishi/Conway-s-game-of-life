@@ -8,7 +8,7 @@ if (SIZE == "") {
 BORN = 1
 SURVIVES = 2
 
-DEAD = BORN-1
+DEATH = BORN-1
 ALIVE = SURVIVES-1
 
 weightingAdder <- function(M) {
@@ -41,11 +41,11 @@ if (type == "f") {
   image(A, col="green")
 } else if (type == "e") {
   A = matrix(0, nrow=SIZE, ncol=SIZE, byrow=T)
-  image(A, col="white")
+  image(A, col="black")
 } else {
   rand = as.integer(runif(SIZE^2, min=0, max=2))
   A = matrix(rand, nrow=SIZE, ncol=SIZE, byrow=T)
-  image(A, col=c("white","green"))
+  image(A, col=c("black","green"))
 }
 
 count <- readline("Make Count: ")
@@ -69,7 +69,7 @@ for (i in 1:count) {
   if (length(A[A==1]) == length(A))
     image(A, col=c("green"))
   else
-    image(A, col=c("white", "green"))
+    image(A, col=c("black", "green"))
 }
 
 
@@ -113,11 +113,13 @@ if (rule_born[[1]] == 0) {
   rule <- list(rule_born, rule_survives)
 }
 
+counter = readline("generation num: ")
+
 generation = 1
 convergence = TRUE
 B = matrix(0, nrow=SIZE, ncol=SIZE, byrow=T)
 repeat {
-  readline()
+  if (counter == "")  readline()
   TMP = weightingAdder(A)
   for (x in 1:SIZE) {
     for (y in 1:SIZE) {
@@ -133,7 +135,8 @@ repeat {
   if (length((A==B)[(A==B)==TRUE]) == SIZE^2) break
 
   A = B
-  image(A, main=paste(title, generation, sep=": "), col=c("white", "green"), axes = TRUE, pch=21)
+  image(A, main=paste(title, generation, sep=": "), col=c("black", "green"), axes = TRUE, pch=21)
+  if (counter != "" && generation == as.numeric(counter))  break
   generation = generation + 1
 }
 
