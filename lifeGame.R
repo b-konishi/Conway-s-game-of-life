@@ -48,30 +48,34 @@ if (type == "f") {
   image(A, col=c("black","green"))
 }
 
-count <- readline("Make Count: ")
-if (count == "") {
-  count = 0
-} else {
-  count <- as.numeric(count)
-}
-for (i in 1:count) {
-  if (count == 0) break
-  print(i, quote=FALSE)
-  input <- as.numeric(locator(1))
-  pos <- as.numeric(input) + 0.05
-  len <- 1.1 / SIZE
-  pos <- as.integer(pos/len) + 1
-  if (A[pos[1], pos[2]] == 1)
-    A[pos[1], pos[2]] = 0
-  else
-    A[pos[1], pos[2]] = 1
+makePattern <- function(M) {
+  count <- readline("Make Count: ")
+  if (count == "") {
+    count = 0
+  } else {
+    count <- as.numeric(count)
+  }
+  for (i in 1:count) {
+    if (count == 0) break
+    print(i, quote=FALSE)
+    input <- as.numeric(locator(1))
+    pos <- as.numeric(input) + 0.05
+    len <- 1.1 / SIZE
+    pos <- as.integer(pos/len) + 1
+    if (M[pos[1], pos[2]] == 1)
+      M[pos[1], pos[2]] = 0
+    else
+      M[pos[1], pos[2]] = 1
 
-  if (length(A[A==1]) == length(A))
-    image(A, col=c("green"))
-  else
-    image(A, col=c("black", "green"))
+    if (length(M[M==1]) == length(M))
+      image(M, col=c("green"))
+    else
+      image(M, col=c("black", "green"))
+  }
+  return(M)
 }
 
+A = makePattern(A)
 
 title = ""
 cat("nomal: B3/S23\n")
@@ -119,7 +123,11 @@ generation = 1
 convergence = TRUE
 B = matrix(0, nrow=SIZE, ncol=SIZE, byrow=T)
 repeat {
-  if (counter == "")  readline()
+  if (counter == "")  request = readline()
+  if (request == "add") {
+    A = makePattern(A)
+    readline()
+  }
   TMP = weightingAdder(A)
   for (x in 1:SIZE) {
     for (y in 1:SIZE) {
