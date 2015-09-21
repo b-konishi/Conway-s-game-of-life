@@ -15,7 +15,7 @@ weightingAdder <- function(M) {
   TMP = matrix(0, nrow=SIZE, ncol=SIZE, byrow=T)
   for (i in 1:SIZE) {
     for (j in 1:SIZE) {
-      if (M[i,j] == DEATH)  next
+      if (M[i,j] == 0)  next
       for (k in -1:1) {
         for (l in -1:1) {
           if (k == 0 && l == 0) next
@@ -34,33 +34,42 @@ weightingAdder <- function(M) {
   return(TMP)
 }
 
+opt <- function(M) {
+  return(t(apply(M,2,rev)))
+}
+
+title = "Conway's game of life"
 cat('Type: {fill, empty, random}={f, e, r}\n')
 type <- readline("Type: ")
 if (type == "f") {
   A = matrix(1, nrow=SIZE, ncol=SIZE, byrow=T)
-  image(A, col="green")
+  image(opt(A), main=title, col="green", axes=FALSE)
 } else if (type == "e") {
   A = matrix(0, nrow=SIZE, ncol=SIZE, byrow=T)
-  image(A, col="black")
+  image(opt(A), main=title, col="black", axes=FALSE)
 } else {
   rand = as.integer(runif(SIZE^2, min=0, max=2))
   A = matrix(rand, nrow=SIZE, ncol=SIZE, byrow=T)
-  image(A, col=c("black","green"))
+  image(opt(A), main=title, col=c("black","green"), axes=FALSE)
 }
+
 
 makePattern <- function(M) {
   count <- readline("Make Count: ")
-  if (count == "") {
+  if (count == "")
     count = 0
-  } else {
+  else
     count <- as.numeric(count)
-  }
+
   for (i in 1:count) {
     if (count == 0) break
     print(i, quote=FALSE)
     input <- as.numeric(locator(1))
     pos <- as.numeric(input) + 0.05
-    len <- 1.1 / SIZE
+    if (SIZE <= 10)
+      len <- 1.1 / SIZE
+    else
+      len <- 1.05 / SIZE
     pos <- as.integer(pos/len) + 1
     if (M[pos[1], pos[2]] == 1)
       M[pos[1], pos[2]] = 0
@@ -68,54 +77,64 @@ makePattern <- function(M) {
       M[pos[1], pos[2]] = 1
 
     if (length(M[M==1]) == length(M))
-      image(M, col=c("green"))
+      image(M, col=c("green"), axes=FALSE)
     else
-      image(M, col=c("black", "green"))
+      image(M, col=c("black", "green"), axes=FALSE)
   }
   return(M)
 }
 
-A = makePattern(A)
+A = makePattern(opt(A))
+
+library('stringr')
+patternCompiler <- function(pattern) {
+  rule_born = c()
+  rule_survives = c()
+  pattern = str_split(pattern, "")[[1]]
+  for (i in 1:length(pattern)) {
+    if (pattern[i] == "B") FLAG = FALSE
+    if (pattern[i] == "S") FLAG = TRUE
+
+    if (str_detect(pattern[i], "[0-9]")) {
+      if (!FLAG) {
+        rule_born <- c(rule_born, as.numeric(pattern[i]))
+      } else {
+        rule_survives <- c(rule_survives, as.numeric(pattern[i]))
+      }
+    }
+  }
+  return (list(rule_born, rule_survives))
+}
 
 title = ""
+cat('\n')
 cat("nomal: B3/S23\n")
 cat("day and night: B3678/S34678\n")
 cat("HighLife: B36/S23\n")
 cat("Replicator: B1357/S1357\n")
 cat("2x2: B36/S125\n")
+cat('\nPattern: [B3/S34]\n')
 rule <- readline("Input Pattern: ")
 if (rule == "nomal" || rule == "") {
   title = "nomal"
-  rule_born <- c(3)
-  rule_survives <- c(2,3)
+  rule = "B3/S23"
 } else if (rule == "day and night") {
   title = "day and night"
-  rule_born <- c(3,6,7,8)
-  rule_survives <- c(3,4,6,7,8)
+  rule = "B3678/S34678"
 } else if (rule == "HighLife") {
   title = "HighLife"
-  rule_born <- c(3,6)
-  rule_survives <- c(2,3)
+  rule = "B36/S23"
 } else if (rule == "Replicator") {
   title = "Replicator"
-  rule_born <- c(1,3,5,7)
-  rule_survives <- c(1,3,5,7)
+  rule = "B1357/S1357"
 } else if (rule == "2x2") {
   title = "2x2"
-  rule_born <- c(3,6)
-  rule_survives <- c(1,2,5)
+  rule = "B36/S125"
 } else {
-  rule <- unlist(strsplit(rule, " "))
-  rule_born <- as.numeric(unlist(strsplit(rule[1], ",")))
-  rule_survives <- as.numeric(unlist(strsplit(rule[2], ",")))
+  title = rule
 }
-if (rule_born[[1]] == 0) {
-  rule <- list(c(), rule_survives)
-} else if (rule_survives[[1]] == 0) {
-  rule <- list(rule_born, c())
-} else {
-  rule <- list(rule_born, rule_survives)
-}
+rule <- patternCompiler(rule)
+print(rule)
 
 counter = readline("generation num: ")
 
@@ -125,25 +144,38 @@ B = matrix(0, nrow=SIZE, ncol=SIZE, byrow=T)
 repeat {
   if (counter == "")  request = readline()
   if (request == "add") {
-    A = makePattern(A)
+    if (generation == 1)
+      A = makePattern(A)
+    else
+      A = makePattern(opt(A))
     readline()
   }
   TMP = weightingAdder(A)
   for (x in 1:SIZE) {
     for (y in 1:SIZE) {
-      if (A[x,y] == DEATH && length(rule[[BORN]][1]) != 0) {
-        if (length(rule[[BORN]][rule[[BORN]] == TMP[x,y]]) == 1)  B[x,y] = 1
-        else  B[x,y] = 0
-      } else if (A[x,y] == ALIVE && length(rule[[SURVIVES]][1]) != 0) {
-        if (length(rule[[SURVIVES]][rule[[SURVIVES]] == TMP[x,y]]) == 1)  B[x,y] = 1
-        else  B[x,y] = 0
-      }
+      if (A[x,y] == DEATH) {
+        if (is.null(rule[[BORN]]) || length(rule[[BORN]][rule[[BORN]] == TMP[x,y]]) == 0)
+          B[x,y] = 0
+        else
+          B[x,y] = 1
+        next
+      } 
+      if (A[x,y] == ALIVE) {
+        if (is.null(rule[[SURVIVES]]) || length(rule[[SURVIVES]][rule[[SURVIVES]]==TMP[x,y]])==0)
+          B[x,y] = 0
+        else
+          B[x,y] = 1
+        next
+      } 
     }
   }
   if (length((A==B)[(A==B)==TRUE]) == SIZE^2) break
 
   A = B
-  image(A, main=paste(title, generation, sep=": "), col=c("black", "green"), axes = TRUE, pch=21)
+  if (length(A[A==1]) == length(A))
+    image(opt(A), main=paste(title, generation, sep=": "), col=c("green"), axes = FALSE)
+  else
+    image(opt(A), main=paste(title, generation, sep=": "), col=c("black", "green"), axes = FALSE)
   if (counter != "" && generation == as.numeric(counter))  counter = ""
   generation = generation + 1
 }
