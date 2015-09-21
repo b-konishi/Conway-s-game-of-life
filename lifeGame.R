@@ -50,7 +50,7 @@ if (type == "f") {
 } else {
   rand = as.integer(runif(SIZE^2, min=0, max=2))
   A = matrix(rand, nrow=SIZE, ncol=SIZE, byrow=T)
-  image(A, main=title, col=c(BG_COLOR,FW_COLOR), axes=FALSE)
+  image(A, main=title, col=c(BG_COLOR,FW_COLOR), axes=TRUE)
 }
 
 
@@ -65,7 +65,7 @@ makePattern <- function(M) {
     pos <- as.numeric(input) + 0.05
     if (SIZE <= 10) 
       len <- 1.1/SIZE
-    else if (SIZE > 30)
+    else if (SIZE > 10)
       len <- 1.1/SIZE
 
     pos <- as.integer(pos/len) + 1
