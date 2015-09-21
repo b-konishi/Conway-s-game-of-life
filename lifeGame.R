@@ -8,26 +8,39 @@ SURVIVES = 2
 DEATH = BORN-1
 ALIVE = SURVIVES-1
 
+weighter <- function(x, M) {
+  TMP = matrix(0, nrow=SIZE, ncol=SIZE, byrow=T)
+  y <- x[1]
+  x <- x[2]
+  if (M[x,y] == 1) {
+    m <- -1:1
+    n <- -1:1
+    if (x == 1) {
+      m <- c(0, 1, SIZE-1)
+    } else if (x == SIZE) {
+      m <- c(-1, 0, -(SIZE-1))
+    }
+    if (y == 1) {
+      n <- c(0, 1, SIZE-1)
+    } else if (y == SIZE) {
+      n <- c(-1, 0, -(SIZE-1))
+    }
+    o <- expand.grid(m,n)
+
+    TMP[x+o[[1]], y+o[[2]]] = TMP[x+o[[1]], y+o[[2]]] + 1
+  }
+  return(TMP)
+}
+
 weightingAdder <- function(M) {
   TMP = matrix(0, nrow=SIZE, ncol=SIZE, byrow=T)
-  for (i in 1:SIZE) {
-    for (j in 1:SIZE) {
-      if (M[i,j] == 0)  next
-      for (k in -1:1) {
-        for (l in -1:1) {
-          if (k == 0 && l == 0) next
-          x = i + k
-          y = j + l
-          if (i+k == 0)  x = SIZE
-          else if (i+k == SIZE+1) x = 1
-          if (j+l == 0)  y = SIZE
-          else if (j+l == SIZE+1) y = 1
+  cell = expand.grid(1:SIZE, 1:SIZE)
+  cell = c(cell[[1]], cell[[2]])
+  cell <- matrix(cell, nrow=2, ncol=SIZE^2, byrow=T)
+  total <- (apply(cell, 2, weighter, M))
+  TMP = apply(total, 1, sum)
+  TMP <- t(matrix(TMP, nrow=SIZE, ncol=SIZE, byrow=T))
 
-          TMP[x,y] = TMP[x,y] + 1
-        }
-      }
-    }
-  }
   return(TMP)
 }
 
@@ -144,7 +157,7 @@ repeat {
         next
       } 
       if (A[x,y] == ALIVE) {
-        if (is.null(rule[[SURVIVES]]) || length(rule[[SURVIVES]][rule[[SURVIVES]]==TMP[x,y]])==0)
+        if (is.null(rule[[SURVIVES]])||length(rule[[SURVIVES]][(rule[[SURVIVES]])==TMP[x,y]-1])==0)
           B[x,y] = 0
         else
           B[x,y] = 1
