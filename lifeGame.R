@@ -1,10 +1,7 @@
 
 SIZE = readline("Size(default: 10): ")
-if (SIZE == "") {
-  SIZE = 10 
-} else {
-  SIZE = as.numeric(SIZE)
-}
+SIZE = if(SIZE == "") 10 else as.numeric(SIZE)
+
 BORN = 1
 SURVIVES = 2
 
@@ -34,6 +31,7 @@ weightingAdder <- function(M) {
   return(TMP)
 }
 
+# Deprecated function
 opt <- function(M) {
   return(t(apply(M,2,rev)))
 }
@@ -43,48 +41,37 @@ cat('Type: {fill, empty, random}={f, e, r}\n')
 type <- readline("Type: ")
 if (type == "f") {
   A = matrix(1, nrow=SIZE, ncol=SIZE, byrow=T)
-  image(opt(A), main=title, col="green", axes=FALSE)
+  image(A, main=title, col="green", axes=FALSE)
 } else if (type == "e") {
   A = matrix(0, nrow=SIZE, ncol=SIZE, byrow=T)
-  image(opt(A), main=title, col="black", axes=FALSE)
+  image(A, main=title, col="black", axes=FALSE)
 } else {
   rand = as.integer(runif(SIZE^2, min=0, max=2))
   A = matrix(rand, nrow=SIZE, ncol=SIZE, byrow=T)
-  image(opt(A), main=title, col=c("black","green"), axes=FALSE)
+  image(A, main=title, col=c("black","green"), axes=FALSE)
 }
 
 
 makePattern <- function(M) {
   count <- readline("Make Count: ")
-  if (count == "")
-    count = 0
-  else
-    count <- as.numeric(count)
+  count = if (count == "") 0 else as.numeric(count)
 
   for (i in 1:count) {
     if (count == 0) break
     print(i, quote=FALSE)
     input <- as.numeric(locator(1))
     pos <- as.numeric(input) + 0.05
-    if (SIZE <= 10)
-      len <- 1.1 / SIZE
-    else
-      len <- 1.05 / SIZE
+    len = if(SIZE<=10) 1.1/SIZE else 1.05/SIZE
     pos <- as.integer(pos/len) + 1
-    if (M[pos[1], pos[2]] == 1)
-      M[pos[1], pos[2]] = 0
-    else
-      M[pos[1], pos[2]] = 1
+    
+    M[pos[1], pos[2]] = if(M[pos[1],pos[2]]==1) 0 else 1
 
-    if (length(M[M==1]) == length(M))
-      image(M, col=c("green"), axes=FALSE)
-    else
-      image(M, col=c("black", "green"), axes=FALSE)
+    image(M, col = if(length(M[M==1])==length(M)) "green" else c("black","green"), axes=FALSE)
   }
   return(M)
 }
 
-A = makePattern(opt(A))
+A = makePattern(A)
 
 library('stringr')
 patternCompiler <- function(pattern) {
@@ -134,7 +121,6 @@ if (rule == "nomal" || rule == "") {
   title = rule
 }
 rule <- patternCompiler(rule)
-print(rule)
 
 counter = readline("generation num: ")
 
@@ -144,10 +130,7 @@ B = matrix(0, nrow=SIZE, ncol=SIZE, byrow=T)
 repeat {
   if (counter == "")  request = readline()
   if (request == "add") {
-    if (generation == 1)
-      A = makePattern(A)
-    else
-      A = makePattern(opt(A))
+    A = makePattern(A)
     readline()
   }
   TMP = weightingAdder(A)
@@ -172,10 +155,7 @@ repeat {
   if (length((A==B)[(A==B)==TRUE]) == SIZE^2) break
 
   A = B
-  if (length(A[A==1]) == length(A))
-    image(opt(A), main=paste(title, generation, sep=": "), col=c("green"), axes = FALSE)
-  else
-    image(opt(A), main=paste(title, generation, sep=": "), col=c("black", "green"), axes = FALSE)
+  image(A, main=paste(title,generation,sep=": "), col=if(length(A[A==1])==length(A)) "green" else c("black","green"), axes=FALSE)
   if (counter != "" && generation == as.numeric(counter))  counter = ""
   generation = generation + 1
 }
