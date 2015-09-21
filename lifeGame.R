@@ -1,6 +1,8 @@
 
 SIZE = readline("Size(default: 10): ")
 SIZE = if(SIZE == "") 10 else as.numeric(SIZE)
+BG_COLOR = "black"
+FW_COLOR = "green"
 
 BORN = 1
 SURVIVES = 2
@@ -41,14 +43,14 @@ cat('Type: {fill, empty, random}={f, e, r}\n')
 type <- readline("Type: ")
 if (type == "f") {
   A = matrix(1, nrow=SIZE, ncol=SIZE, byrow=T)
-  image(A, main=title, col="green", axes=FALSE)
+  image(A, main=title, col=FW_COLOR, axes=FALSE)
 } else if (type == "e") {
   A = matrix(0, nrow=SIZE, ncol=SIZE, byrow=T)
-  image(A, main=title, col="black", axes=FALSE)
+  image(A, main=title, col=BG_COLOR, axes=FALSE)
 } else {
   rand = as.integer(runif(SIZE^2, min=0, max=2))
   A = matrix(rand, nrow=SIZE, ncol=SIZE, byrow=T)
-  image(A, main=title, col=c("black","green"), axes=FALSE)
+  image(A, main=title, col=c(BG_COLOR,FW_COLOR), axes=FALSE)
 }
 
 
@@ -66,7 +68,7 @@ makePattern <- function(M) {
     
     M[pos[1], pos[2]] = if(M[pos[1],pos[2]]==1) 0 else 1
 
-    image(M, col = if(length(M[M==1])==length(M)) "green" else c("black","green"), axes=FALSE)
+    image(M, col = if(length(M[M==1])==length(M)) FW_COLOR else c(BG_COLOR,FW_COLOR), axes=FALSE)
   }
   return(M)
 }
@@ -93,33 +95,44 @@ patternCompiler <- function(pattern) {
   return (list(rule_born, rule_survives))
 }
 
-title = ""
-cat('\n')
-cat("nomal: B3/S23\n")
-cat("day and night: B3678/S34678\n")
-cat("HighLife: B36/S23\n")
-cat("Replicator: B1357/S1357\n")
-cat("2x2: B36/S125\n")
-cat('\nPattern: [B3/S34]\n')
-rule <- readline("Input Pattern: ")
-if (rule == "nomal" || rule == "") {
-  title = "nomal"
-  rule = "B3/S23"
-} else if (rule == "day and night") {
-  title = "day and night"
-  rule = "B3678/S34678"
-} else if (rule == "HighLife") {
-  title = "HighLife"
-  rule = "B36/S23"
-} else if (rule == "Replicator") {
-  title = "Replicator"
-  rule = "B1357/S1357"
-} else if (rule == "2x2") {
-  title = "2x2"
-  rule = "B36/S125"
-} else {
-  title = rule
+printPattern <- function() {
+  cat('\n')
+  cat("normal: B3/S23\n")
+  cat("day and night: B3678/S34678\n")
+  cat("HighLife: B36/S23\n")
+  cat("Replicator: B1357/S1357\n")
+  cat("2x2: B36/S125\n")
+  cat('\nPattern: [B3/S34]\n')
 }
+inputPattern <- function(rule) {
+  rule <- readline("Input Pattern: ")
+  if (rule == "normal" || rule=="n" || rule == "") {
+    title = "normal"
+    rule = "B3/S23"
+  } else if (rule == "day and night" || rule=="d") {
+    title = "day and night"
+    rule = "B3678/S34678"
+  } else if (rule == "HighLife" || rule=="h") {
+    title = "HighLife"
+    rule = "B36/S23"
+  } else if (rule == "Replicator" || rule=="r") {
+    title = "Replicator"
+    rule = "B1357/S1357"
+  } else if (rule == "2x2" || rule=="2") {
+    title = "2x2"
+    rule = "B36/S125"
+  } else {
+    title = rule
+  }
+  
+  return(paste(title, rule, sep=","))
+}
+
+title = ""
+printPattern()
+rule <- inputPattern(rule)
+title <- strsplit(rule, ",")[[1]][1]
+rule <- strsplit(rule, ",")[[1]][2]
 rule <- patternCompiler(rule)
 
 counter = readline("generation num: ")
@@ -132,7 +145,20 @@ repeat {
   if (request == "add") {
     A = makePattern(A)
     readline()
+  } else if (request == "fwcolor") {
+    cat('Color: {white, red, green, blue, lightblue, purple, yellow, gray, black}\n')
+    FW_COLOR = readline("Color: ")
+  } else if (request == "bgcolor") {
+    cat('Color: {white, red, green, blue, lightblue, purple, yellow, gray, black}\n')
+    BG_COLOR = readline("Color: ")
+  } else if (request == "rule") {
+    printPattern()
+    rule <- inputPattern(rule)
+    title <- strsplit(rule, ",")[[1]][1]
+    rule <- strsplit(rule, ",")[[1]][2]
+    rule <- patternCompiler(rule)
   }
+
   TMP = weightingAdder(A)
   for (x in 1:SIZE) {
     for (y in 1:SIZE) {
@@ -155,7 +181,7 @@ repeat {
   if (length((A==B)[(A==B)==TRUE]) == SIZE^2) break
 
   A = B
-  image(A, main=paste(title,generation,sep=": "), col=if(length(A[A==1])==length(A)) "green" else c("black","green"), axes=FALSE)
+  image(A, main=paste(title,generation,sep=": "), col=if(length(A[A==1])==length(A)) FW_COLOR else c(BG_COLOR,FW_COLOR), axes=FALSE)
   if (counter != "" && generation == as.numeric(counter))  counter = ""
   generation = generation + 1
 }
