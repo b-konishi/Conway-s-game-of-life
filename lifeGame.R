@@ -1,6 +1,6 @@
 
-SIZE = readline("Size(default: 10): ")
-SIZE = if(SIZE == "") 10 else as.numeric(SIZE)
+SIZE = readline("Size(default: 30): ")
+SIZE = if(SIZE == "") 30 else as.numeric(SIZE)
 BG_COLOR = "black"
 FW_COLOR = "green"
 
@@ -63,7 +63,11 @@ makePattern <- function(M) {
     print(i, quote=FALSE)
     input <- as.numeric(locator(1))
     pos <- as.numeric(input) + 0.05
-    len = if(SIZE<=10) 1.1/SIZE else 1.05/SIZE
+    if (SIZE <= 10) 
+      len <- 1.1/SIZE
+    else if (SIZE > 30)
+      len <- 1.1/SIZE
+
     pos <- as.integer(pos/len) + 1
     
     M[pos[1], pos[2]] = if(M[pos[1],pos[2]]==1) 0 else 1
@@ -157,6 +161,8 @@ repeat {
     title <- strsplit(rule, ",")[[1]][1]
     rule <- strsplit(rule, ",")[[1]][2]
     rule <- patternCompiler(rule)
+  } else if (request == "quit" || request == "q") {
+    if (readline("Are you sure you want to quit? [y or n]: ") == "y") break
   }
 
   TMP = weightingAdder(A)
