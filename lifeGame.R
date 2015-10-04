@@ -61,10 +61,7 @@ makePattern <- function(M) {
   for (i in 1:count) {
     if (count == 0) break
     print(i, quote=FALSE)
-    input <- as.numeric(locator(1))
-    pos <- as.numeric(input) + 0.05
-
-    pos <- as.integer(pos) + 1
+    pos <- as.integer(as.numeric(locator(1)) + 0.05) + 1
     
     M[pos[1], pos[2]] = if(M[pos[1],pos[2]]==1) 0 else 1
 
