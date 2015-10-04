@@ -43,14 +43,14 @@ cat('Type: {fill, empty, random}={f, e, r}\n')
 type <- readline("Type: ")
 if (type == "f") {
   A = matrix(1, nrow=SIZE, ncol=SIZE, byrow=T)
-  image(A, main=title, col=FW_COLOR, axes=FALSE)
+  image(x=0:SIZE, y=0:SIZE, xlab="", ylab="", A, main=title, col=FW_COLOR, axes=FALSE)
 } else if (type == "e") {
   A = matrix(0, nrow=SIZE, ncol=SIZE, byrow=T)
-  image(A, main=title, col=BG_COLOR, axes=FALSE)
+  image(x=0:SIZE, y=0:SIZE, xlab="", ylab="", A, main=title, col=BG_COLOR, axes=FALSE)
 } else {
   rand = as.integer(runif(SIZE^2, min=0, max=2))
   A = matrix(rand, nrow=SIZE, ncol=SIZE, byrow=T)
-  image(A, main=title, col=c(BG_COLOR,FW_COLOR), axes=TRUE)
+  image(x=0:SIZE, y=0:SIZE, xlab="", ylab="", A, main=title, col=c(BG_COLOR,FW_COLOR), axes=TRUE)
 }
 
 
@@ -63,16 +63,12 @@ makePattern <- function(M) {
     print(i, quote=FALSE)
     input <- as.numeric(locator(1))
     pos <- as.numeric(input) + 0.05
-    if (SIZE <= 10) 
-      len <- 1.1/SIZE
-    else if (SIZE > 10)
-      len <- 1.1/SIZE
 
-    pos <- as.integer(pos/len) + 1
+    pos <- as.integer(pos) + 1
     
     M[pos[1], pos[2]] = if(M[pos[1],pos[2]]==1) 0 else 1
 
-    image(M, col = if(length(M[M==1])==length(M)) FW_COLOR else c(BG_COLOR,FW_COLOR), axes=FALSE)
+    image(x=0:SIZE, y=0:SIZE, xlab="", ylab="", M, col = if(length(M[M==1])==length(M)) FW_COLOR else c(BG_COLOR,FW_COLOR), axes=FALSE)
   }
   return(M)
 }
@@ -187,7 +183,7 @@ repeat {
   if (length((A==B)[(A==B)==TRUE]) == SIZE^2) break
 
   A = B
-  image(A, main=paste(title,generation,sep=": "), col=if(length(A[A==1])==length(A)) FW_COLOR else c(BG_COLOR,FW_COLOR), axes=FALSE)
+  image(x=0:SIZE, y=0:SIZE, xlab="", ylab="", A, main=paste(title,generation,sep=": "), col=if(length(A[A==1])==length(A)) FW_COLOR else c(BG_COLOR,FW_COLOR), axes=FALSE)
   if (counter != "" && generation == as.numeric(counter))  counter = ""
   generation = generation + 1
 }
